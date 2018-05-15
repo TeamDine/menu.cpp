@@ -180,7 +180,7 @@ void Menu::showData(){
     string name;
     string code;
 
-    myFile.open("CodigosProfesores.txt");
+    myFile.open("CodigosProfesores.txt", ios_base::app);
     myFile.seekg(0,ios::beg);
 
     cout << endl << endl;
