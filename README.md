@@ -1,13 +1,12 @@
 # menu.cpp
 ///Implementación de la clase Menu Principal
-
 #include "menu.h"
 
 using namespace std;
 
 void Menu::startMenu() {
 	int option = 0;
-    system("color 80");  ///Colorea la pantalla
+    system("color F0");  ///Colorea la pantalla
 
     do{
         system("cls");
@@ -61,7 +60,7 @@ void Menu::access() {
 	fstream myFile;
 
     /*** Checar si el archivo existe, si es así checar si está vacio ***/
-	myFile.open("CodigosProfesores.txt",ios_base::app);
+	myFile.open("CodigosProfesores.txt", ios_base::app);
 	if(!myFile.good()){
         flag = false;   ///Archivo no existente
 	}
@@ -112,7 +111,9 @@ void Menu::access() {
             case 1:
                 system("cls");
                 cout << endl << endl;
-                insertData();
+                ///insertPersonalData();
+                ///insertAcademicFormation();
+                insertAcademicProduction();
                 system("pause");
                 break;
             case 2:
@@ -200,7 +201,8 @@ void Menu::showData(){
     myFile.close();
 }
 
-void Menu::insertData(){
+/******************************** DATOS PERSONALES ****************************************/
+void Menu::insertPersonalData(){
     PersonalData data;
     Name myName;
     Address myAddress;
@@ -209,7 +211,7 @@ void Menu::insertData(){
     int option;
     int conteo;
 
-    cout << "\t\t\t*********Registro de datos**************" << endl << endl << endl;
+    cout << "\t\t\t*********Registro de datos (PERSONALES)**************" << endl << endl << endl;
     cout << "\t\tPor favor, llenar los siguientes campos disponibles" << endl << endl;
     cout << "\t\tSi desconoce un dato, solo agregue un guion '-' o teclee [enter] para continuar " << endl << endl;
 
@@ -332,22 +334,20 @@ void Menu::insertData(){
     data.setStatus(aux);        ///se agrega estado civil al registro
 
     /***** **** *** ** * Registro de Dependientes económicos * ** *** **** *****/
+    int years = 0;
+    int registro = 0;
 
     do{
-        int registro;
         system("cls");
 
         cout << endl << endl;
         cout << "\t\t*************Dependientes Economicos *****************" << endl;
-        registro = data.getCont();
-        cout << "\t\tHasta el momento tiene: " << registro << " Dependientes economicos registrados" << endl;
-        cout << "\t\tPuede registrar hasta 10 familiares" << endl;
-        conteo = 10;
+        registro = data.getLastPos();
+        conteo = 10;    ///Limite de registros
 
         flag = false;
-        int years = 0;
 
-        cout << "\t\tRegistro #" << registro+1 << endl;
+        cout << "\t\tRegistro #" << registro+2 << endl;
         do{
             cout << "\t\tApellido(s): ";
             getline(cin, aux, '\n');
@@ -379,6 +379,7 @@ void Menu::insertData(){
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(),'\n');
                 cout << "\t\tCaracter incorrecto" << endl << "\t\t";
+                cin.ignore();
                 system("pause");
             }
             else if(years < 0 or years > 99){
@@ -388,11 +389,11 @@ void Menu::insertData(){
             else{
                 flag = true;
             }
-            cin.ignore();
 
         }while(!flag);
 
-        registro++;
+        cout << "Edad: " << years;
+        data.insertData(registro, myName, years);    ///Actualiza numero de registros;
 
         do{
             cout << endl << endl;
@@ -410,7 +411,6 @@ void Menu::insertData(){
             }
             cin.ignore();
 
-
             if(option == 1){
                 flag = true;
                 if(registro == conteo){
@@ -427,8 +427,543 @@ void Menu::insertData(){
 
         }while(!flag);
 
-        data.setCont(registro);     ///Actualiza numero de registros;
-
     }while(conteo == 10);
 
+    teacher.setData(data);      ///Agrega Datos personales al profesor en turno
+}
+
+/******************************** FORMACION ACADEMICA ****************************************/
+void Menu::insertAcademicFormation(){
+    Formation schoolar;
+    string myStr;
+    string aux;
+    bool flag;
+
+    ///Datos para fechas
+    Date myDate;
+
+    ///Valor del grado
+    int grade = 0;
+    /// grade = 0 -> No se ha insertado ningun grado academico
+    /// grade = 1 -> Se inserto al menos 1 licenciatura
+    /// grade = 2 -> Se inserto al menos 1 maestría
+
+    int option = 0;
+    int conteo = 10;    ///Limite de registros
+    int pos = 0;
+    int myInt = 0;
+
+    do{
+        pos = teacher.getLastFormation();
+        myStr = "";
+        myInt = 0;
+        do{
+            flag = false;
+
+            system("cls");
+            cout << endl << endl;
+            cout << "\t\t\t*********Registro de datos (FORMACION ACADEMICA)**************" << endl << endl << endl;
+            cout << "\t\tPor favor, llenar los siguientes campos disponibles" << endl << endl;
+            cout << "\t\tSi desconoce un dato, solo agregue un guion '-' o teclee [enter] para continuar " << endl << endl;
+
+            cout << endl << endl;
+            cout << "\t\t****GRADO ACADEMICO****" << endl;
+            cout << "\t\t1)Licenciatura" << endl;
+            cout << "\t\t2)Especialidad" << endl;
+            cout << "\t\t3)Maestria" << endl;
+            cout << "\t\t4)Doctorado" << endl;
+            cout << "\t\tOpcion: ";
+
+            cin >> option;
+
+            if(!cin){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(),'\n');
+                cout << "\t\tCaracter incorrecto" << endl << "\t\t";
+                system("pause");
+            }
+            cin.ignore();
+
+            switch(option){
+            case 1:
+                grade = 1;      ///Se añadio una licenciatura
+                aux = "LICENCIATURA";
+                flag = true;
+                break;
+            case 2:
+                if(grade == 1){
+                    aux = "ESPECIALIDAD";
+                    flag = true;
+                }
+                else{
+                    cout << endl << "\t\tNO PUEDES AGREGAR ESPECIALIDAD; SI NO TIENE UNA LICENCIATURA REGISTRADA" << endl << "\t\t";
+                    system("Pause");
+                }
+                break;
+            case 3:
+                if(grade == 1){
+                    aux = "MAESTRIA";
+                    flag = true;
+                }
+                else{
+                    cout << endl << "\t\tNO PUEDES AGREGAR MAESTRIA; SI NO TIENE UNA LICENCIATURA REGISTRADA" << endl << "\t\t";
+                    system("Pause");
+                }
+                break;
+            case 4:
+                if(grade == 2){
+                    aux = "DOCTORADO";
+                    flag = true;
+                }
+                else{
+                    cout << endl << "\t\tNO PUEDES AGREGAR DOCTORADO; SI NO TIENE UNA MAESTRIA REGISTRADA" << endl << "\t\t";
+                    system("Pause");
+                }
+                break;
+            default:
+                cout << endl;
+                cout << "\t\tOpcion Incorrecta" << endl << "\t\t";
+                system("pause");
+                break;
+            }
+        }while(!flag);
+
+        schoolar.setGrade(aux);     ///Se agrega tipo de grado academico
+
+        system("cls");
+        cout << endl << endl;
+        cout << "\t\t*****************DATOS DE " << aux << "********************" << endl;
+        cout << "\t\tPor favor, llenar los siguientes campos disponibles" << endl << endl;
+        cout << "\t\tSi desconoce un dato, solo agregue un guion '-' o teclee [enter] para continuar " << endl << endl;
+
+        cout << "\t\tNombre del grado academico (Ej. Ing en sistemas computacionales) " << endl;
+        cout << "\t\tNombre: ";
+        getline(cin, myStr, '\n');
+
+        schoolar.setGradeName(myStr);   ///Se agrega nombre de grado escolar
+
+        cout << endl << "\t\tNombre de la institucion academica (Ej. Universidad de Guadalajara) " << endl;
+        cout << "\t\tNombre: ";
+        getline(cin, myStr, '\n');
+
+        schoolar.setInstitution(myStr);
+
+        cout << endl << "\t\tEs importante ingresar las siguientes fechas en el formato correspondiente <YYYY/MM/AA>";
+        cout << endl <<  "\t\tFecha de ingreso (Ej. 2016/08/15) " << endl;
+        cout << "\t\tFecha: ";
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setYear(myInt);
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setMonth(myInt);
+        getline(cin, myStr, '\n');
+        myInt = atoi(myStr.c_str());
+        myDate.setDay(myInt);
+
+        schoolar.setBeginDate(myDate);  ///Se agrega fecha de entrada
+
+        cout << endl <<  "\t\tFecha de egreso (Ej. 2021/12/15) " << endl;
+        cout << "\t\tFecha: ";
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setYear(myInt);
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setMonth(myInt);
+        getline(cin, myStr, '\n');
+        myInt = atoi(myStr.c_str());
+        myDate.setDay(myInt);
+
+        schoolar.setFinishDate(myDate);  ///Se agrega fecha de salida
+
+        cout << endl << "\t\tFecha de Obtencion de titulo (Ej. 2022/04/15) " << endl;
+        cout << "\t\tFecha: ";
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setYear(myInt);
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setMonth(myInt);
+        getline(cin, myStr, '\n');
+        myInt = atoi(myStr.c_str());
+        myDate.setDay(myInt);
+
+        schoolar.setDegreeDate(myDate);  ///Se agrega fecha de entrada
+
+        cout << endl << "\t\tNumero de Cedula profesional :";
+        getline(cin, myStr, '\n');
+
+        schoolar.setIdCard(myStr);
+
+        teacher.insertFormation(pos, schoolar); ///Inserta en lista
+
+        flag = false;
+        do{
+            cout << endl << endl;
+            cout << "\t\tDesea agregar otra carrera" << endl;
+            cout << "\t\t1)Si" << endl;
+            cout << "\t\t2)No" << endl;
+            cout << "\t\tOpcion: ";
+            cin >> option;
+
+            if(!cin){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(),'\n');
+                cout << "\t\tCaracter incorrecto" << endl << "\t\t";
+                system("pause");
+            }
+            cin.ignore();
+
+            if(option == 1){
+                flag = true;
+                if(pos == conteo){
+                    cout << endl << endl;
+                    cout << "\t\tYa no puedes hacer mas registros " << endl << "\t\t";
+                    conteo = 0;
+                    system("pause");
+                }
+            }
+            else if(option == 2){
+                flag = true;
+                conteo = 0;
+            }
+
+        }while(!flag);
+
+    }while(conteo == 10);
+}
+
+/******************************** PRODUCCION ACADEMICA ****************************************/
+void Menu::insertAcademicProduction(){
+    AcademicProduction production;
+    string myStr;
+    Date myDate;
+    int myInt = 0;
+    Name myName;
+
+    int option = 0;
+    int conteo = 10;
+    int pos = 0;
+    bool flag;
+
+    do{
+        pos = teacher.getLastProduction();
+        do{
+            flag = false;
+            system("cls");
+            cout << endl << endl;
+            cout << "\t\t\t*********Registro de datos (PRODUCCION ACADEMICA)**************" << endl << endl << endl;
+            cout << "\t\tPor favor, llenar los siguientes campos disponibles" << endl << endl;
+            cout << "\t\tSi desconoce un dato, solo agregue un guion '-' o teclee [enter] para continuar " << endl << endl;
+
+            cout << "\t\t****TIPO DE TRABAJO REALIZADO****" << endl;
+            cout << "\t\t1)Libro" << endl;
+            cout << "\t\t2)Articulo" << endl;
+            cout << "\t\t3)Informe" << endl;
+            cout << "\t\t4)Desarrollo de Software" << endl;
+            cout << "\t\t5)Otro " << endl;
+            cout << "\t\tOpcion: ";
+
+            cin >> option;
+
+            if(!cin){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(),'\n');
+                cout << "\t\tCaracter incorrecto" << endl << "\t\t";
+                system("pause");
+            }
+            cin.ignore();
+
+            switch(option){
+            case 1:
+                myStr = "LIBRO";
+                flag = true;
+                break;
+            case 2:
+                myStr = "ARTICULO";
+                flag = true;
+                break;
+            case 3:
+                myStr = "INFORME";
+                flag = true;
+                break;
+            case 4:
+                myStr = "SOFTWARE";
+                flag = true;
+                break;
+            case 5:
+                cout << "\t\tEspecifique el tipo de trabajo (sea breve con su descripcion < 1 a 3 palabras > )" << endl;
+                cout << "\t\tDescripicion: ";
+                getline( cin , myStr, '\n');
+                flag = true;
+                break;
+            default:
+                cout << endl;
+                cout << "\t\tOpcion Incorrecta" << endl << "\t\t";
+                system("pause");
+                break;
+            }
+        }while(!flag);
+
+        production.setType(myStr);  ///Se agrega el tipo de trabajo
+
+        cout << endl << endl;
+        cout << "\t\tNombre del articulo/libro/Software (Ej. Programacion en C++) " << endl;
+        cout << "\t\tNombre: ";
+        getline(cin, myStr, '\n');
+
+        production.setName(myStr);  ///Se agrega nombre de trabajo
+
+        /**** *** ** * FECHA DE ELABORACION * ** *** ****/
+
+        cout << endl << "\t\tEs importante ingresar las siguiente fecha en el formato correspondiente <YYYY/MM/AA>";
+        cout << endl <<  "\t\tFecha de elaboracion (Ej. 2016/08/15) " << endl;
+        cout << "\t\tFecha: ";
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setYear(myInt);
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setMonth(myInt);
+        getline(cin, myStr, '\n');
+        myInt = atoi(myStr.c_str());
+        myDate.setDay(myInt);
+
+        production.setElaborationDate(myDate);  ///Se agrega fecha de elaboracion
+
+        /**** *** *** * Nombre de autor * ** *** ****/
+        do{
+            flag = false;
+            system("cls");
+            cout << "\t\t\t*********Registro de Nombre de Co-Autor*********" << endl << endl;
+            cout << "\t\tApellido(s): ";
+            getline(cin, myStr, '\n');
+
+            myName.setLast(myStr);
+
+            cout << "\t\tNombre(s): ";
+            getline(cin, myStr, '\n');
+
+            myName.setFirst(myStr);
+
+            if(myName.isName(myName)){
+                flag = true;
+            }
+            else{
+                cout << "\t\tNombre invalido. Intente de nuevo" << endl << endl << "\t\t";
+                system("Pause");
+            }
+
+        } while(!flag);
+
+        production.setAuthor(myName);       ///Se agrega nombre de autor
+
+        cout << endl << endl;
+        cout << "\t\tNumero de registro (Ej. 123456)" << endl;
+        cout << "\t\tNumero: ";
+        getline( cin, myStr , '\n');
+
+        production.setId(myStr);        ///Se agrega numero de registro
+
+        /**** *** ** * ESTATUS * ** *** ****/
+        do{
+            flag = false;
+            system("cls");
+            cout << endl << endl;
+
+            cout << "\t\t****STATUS DE TRABAJO REALIZADO****" << endl;
+            cout << "\t\t1)ACEPTADO" << endl;
+            cout << "\t\t2)EN PROCESO" << endl;
+            cout << "\t\t3)PUBLICADO" << endl;
+            cout << "\t\tOpcion: ";
+
+            cin >> option;
+
+            if(!cin){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(),'\n');
+                cout << "\t\tCaracter incorrecto" << endl << "\t\t";
+                system("pause");
+            }
+            cin.ignore();
+
+            switch(option){
+            case 1:
+                myStr = "ACEPTADO";
+                flag = true;
+                break;
+            case 2:
+                myStr = "EN PROCESO";
+                flag = true;
+                break;
+            case 3:
+                myStr = "PUBLICADO";
+                flag = true;
+                break;
+            default:
+                cout << endl;
+                cout << "\t\tOpcion Incorrecta" << endl << "\t\t";
+                system("pause");
+                break;
+            }
+        }while(!flag);
+
+        production.setStatus(myStr);
+
+        teacher.insertProduction(pos, production);  ///Insertando en lista
+
+    /*** Perguntar si agregar mas de uno ***/
+        flag = false;
+        do{
+            cout << endl << endl;
+            cout << "\t\tDesea agregar otra carrera" << endl;
+            cout << "\t\t1)Si" << endl;
+            cout << "\t\t2)No" << endl;
+            cout << "\t\tOpcion: ";
+            cin >> option;
+
+            if(!cin){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(),'\n');
+                cout << "\t\tCaracter incorrecto" << endl << "\t\t";
+                system("pause");
+            }
+            cin.ignore();
+
+            if(option == 1){
+                flag = true;
+                if(pos == conteo){
+                    cout << endl << endl;
+                    cout << "\t\tYa no puedes hacer mas registros " << endl << "\t\t";
+                    conteo = 0;
+                    system("pause");
+                }
+            }
+            else if(option == 2){
+                flag = true;
+                conteo = 0;
+            }
+        }while(!flag);
+
+    }while(conteo == 10);
+}
+
+/******************************** DOCENCIA ****************************************/
+void Menu::insertTeachers(){
+    Teaching course;
+    string myStr;
+    Date myDate;
+    int myInt = 0;
+    int pos = 0;
+    int conteo = 10;
+    int option = 0;
+    bool flag;
+
+    do{
+        flag = false;
+        pos = teacher.getLastCourses();
+        system("cls");
+        cout << endl << endl;
+        cout << "\t\t\t*********Registro de datos (PRODUCCION ACADEMICA)**************" << endl << endl << endl;
+        cout << "\t\tPor favor, llenar los siguientes campos disponibles" << endl << endl;
+        cout << "\t\tSi desconoce un dato, solo agregue un guion '-' o teclee [enter] para continuar " << endl << endl;
+
+        cout << "Nombre de la materia: ";
+        getline(cin, myStr, '\n');
+        course.setName(myStr);      ///Se agrega nombre de materia
+
+        cout << endl << "\t\tEs importante ingresar las siguiente fecha en el formato correspondiente <YYYY/MM/AA>";
+        cout << endl <<  "\t\tFecha de Inicio (Ej. 2016/08/15) " << endl;
+        cout << "\t\tFecha: ";
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setYear(myInt);
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setMonth(myInt);
+        getline(cin, myStr, '\n');
+        myInt = atoi(myStr.c_str());
+        myDate.setDay(myInt);
+
+        course.setInitialDate(myDate);
+
+        cout << endl <<  "\t\tFecha de finalizacion (Ej. 2016/08/15) " << endl;
+        cout << "\t\tFecha: ";
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setYear(myInt);
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setMonth(myInt);
+        getline(cin, myStr, '\n');
+        myInt = atoi(myStr.c_str());
+        myDate.setDay(myInt);
+
+        course.setFinishDate(myDate);
+
+        do{
+            flag = false;
+            system("cls");
+            cout << endl << endl;
+            cout << "\t\tRegistro de horas semanales" << endl;
+            cout << "\t\tHoras: ";
+            cin >> myInt;
+
+            if(!cin){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(),'\n');
+                cout << "\t\tCaracter incorrecto" << endl << "\t\t";
+                system("pause");
+            }
+            cin.ignore();
+
+            if(myInt < 0 or myInt > 15){
+                cout << "\t\tHoras invalidas, intentalo de nuevo" << endl << "\t\t";
+                system("cls");
+                }
+            else{
+                flag = true;
+                }
+
+            }while(!flag);
+
+            course.setHours(myInt);
+
+            teacher.insertCourses(pos, course); ///Inserta en lista
+
+    /*** Perguntar si agregar mas de uno ***/
+        flag = false;
+        do{
+            cout << endl << endl;
+            cout << "\t\tDesea agregar otra carrera" << endl;
+            cout << "\t\t1)Si" << endl;
+            cout << "\t\t2)No" << endl;
+            cout << "\t\tOpcion: ";
+            cin >> option;
+
+            if(!cin){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(),'\n');
+                cout << "\t\tCaracter incorrecto" << endl << "\t\t";
+                system("pause");
+            }
+            cin.ignore();
+
+            if(option == 1){
+                flag = true;
+                if(pos == conteo){
+                    cout << endl << endl;
+                    cout << "\t\tYa no puedes hacer mas registros " << endl << "\t\t";
+                    conteo = 0;
+                    system("pause");
+                }
+            }
+            else if(option == 2){
+                flag = true;
+                conteo = 0;
+            }
+        }while(!flag);
+
+    }while(conteo == 10);
 }
