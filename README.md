@@ -1110,4 +1110,3 @@ void Menu::insertTutorials(){
 	
     }while(conteo == 10);
 }
-
