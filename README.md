@@ -75,6 +75,11 @@ void Menu::access() {
 	}
     myFile.close();
 
+    /*** Checar si la tabla existe, de lo contrario crearla***/
+    if(!findFile()){
+        buildFile();
+    }
+
     /*** Menu ***/
     do{
         system("cls");
@@ -90,7 +95,7 @@ void Menu::access() {
 
         cout << "\t\tManejo de datos de profesores" << endl;
         cout << "\t\t1)Altas" << endl;
-        cout << "\t\t2)Mostrar codigo(s) de Profesores almacenados" << endl;
+        cout << "\t\t2)Mostrar datos de Profesores almacenados" << endl;
         cout << "\t\t3)Bajas" << endl;
         cout << "\t\t4)Buscar un profesor" << endl;
         cout << "\t\t5)Modificar datos" << endl;
@@ -111,9 +116,14 @@ void Menu::access() {
             case 1:
                 system("cls");
                 cout << endl << endl;
-                ///insertPersonalData();
-                ///insertAcademicFormation();
+                insertPersonalData();
+                insertAcademicFormation();
                 insertAcademicProduction();
+                insertTeachers();
+                insertTutorials();
+                cout << endl << endl;
+                cout << "\t\tAgregando a archivo...";
+                writeToDisk();
                 system("pause");
                 break;
             case 2:
@@ -124,7 +134,7 @@ void Menu::access() {
                     system("Pause");
                 }
                 else{
-                    showData();
+                    showRegisters();
                 }
                 break;
             case 3:
@@ -181,18 +191,18 @@ void Menu::showData(){
     string name;
     string code;
 
-    myFile.open("CodigosProfesores.txt", ios_base::app);
+    myFile.open("CodigosProfesores.txt");
     myFile.seekg(0,ios::beg);
 
     cout << endl << endl;
     cout << "\t\t\t\t****LISTA DE PROFESORES****" << endl << endl;
-    cout << right << setw(40) <<"Nombre" << setw(28) << "Codigo" << endl << endl;
+    cout << right << setw(40) <<"Nombre" << setw(35) << "clave" << endl << endl;
     while(!myFile.eof()){
         getline(myFile, name, '|');
         getline(myFile, code, '|');
         if(myFile.eof()) break;
 
-        cout << right << setw(50) << name << setw(20) << code << endl;
+        cout << right << setw(50) << name << setw(32) << code << endl;
     }
 
     cout << endl << "\t\t";
@@ -201,7 +211,9 @@ void Menu::showData(){
     myFile.close();
 }
 
-/******************************** DATOS PERSONALES ****************************************/
+/******************************** PROFESOR ************************************************/
+
+/// DATOS PERSONALES
 void Menu::insertPersonalData(){
     PersonalData data;
     Name myName;
@@ -241,6 +253,11 @@ void Menu::insertPersonalData(){
 
     data.setName(myName);       ///Se agrega nombre al registro
 
+    cout << endl;
+    cout << "\t\tCurp: ";
+    getline(cin, aux, '\n');
+
+    data.setCurp(aux);        ///Se agrega curp al registro
 
     /***** **** *** ** * Registro de Domicilio * ** *** **** *****/
     cout << endl << endl;
@@ -392,7 +409,6 @@ void Menu::insertPersonalData(){
 
         }while(!flag);
 
-        cout << "Edad: " << years;
         data.insertData(registro, myName, years);    ///Actualiza numero de registros;
 
         do{
@@ -432,7 +448,7 @@ void Menu::insertPersonalData(){
     teacher.setData(data);      ///Agrega Datos personales al profesor en turno
 }
 
-/******************************** FORMACION ACADEMICA ****************************************/
+/// FORMACION ACADEMICA
 void Menu::insertAcademicFormation(){
     Formation schoolar;
     string myStr;
@@ -634,7 +650,7 @@ void Menu::insertAcademicFormation(){
     }while(conteo == 10);
 }
 
-/******************************** PRODUCCION ACADEMICA ****************************************/
+/// PRODUCCION ACADEMICA
 void Menu::insertAcademicProduction(){
     AcademicProduction production;
     string myStr;
@@ -817,7 +833,7 @@ void Menu::insertAcademicProduction(){
         flag = false;
         do{
             cout << endl << endl;
-            cout << "\t\tDesea agregar otra carrera" << endl;
+            cout << "\t\tDesea agregar otra produccion" << endl;
             cout << "\t\t1)Si" << endl;
             cout << "\t\t2)No" << endl;
             cout << "\t\tOpcion: ";
@@ -849,7 +865,7 @@ void Menu::insertAcademicProduction(){
     }while(conteo == 10);
 }
 
-/******************************** DOCENCIA ****************************************/
+/// DOCENCIA
 void Menu::insertTeachers(){
     Teaching course;
     string myStr;
@@ -865,11 +881,11 @@ void Menu::insertTeachers(){
         pos = teacher.getLastCourses();
         system("cls");
         cout << endl << endl;
-        cout << "\t\t\t*********Registro de datos (PRODUCCION ACADEMICA)**************" << endl << endl << endl;
+        cout << "\t\t\t*********Registro de datos (DOCENCIA)**************" << endl << endl << endl;
         cout << "\t\tPor favor, llenar los siguientes campos disponibles" << endl << endl;
         cout << "\t\tSi desconoce un dato, solo agregue un guion '-' o teclee [enter] para continuar " << endl << endl;
 
-        cout << "Nombre de la materia: ";
+        cout << "\t\tNombre de la materia: ";
         getline(cin, myStr, '\n');
         course.setName(myStr);      ///Se agrega nombre de materia
 
@@ -920,7 +936,7 @@ void Menu::insertTeachers(){
 
             if(myInt < 0 or myInt > 15){
                 cout << "\t\tHoras invalidas, intentalo de nuevo" << endl << "\t\t";
-                system("cls");
+                system("pause");
                 }
             else{
                 flag = true;
@@ -968,7 +984,7 @@ void Menu::insertTeachers(){
     }while(conteo == 10);
 }
 
-/******************************** TUTORIAS ****************************************/
+/// TUTORIAS
 void Menu::insertTutorials(){
     Tutorials student;
     Name myName;
@@ -1110,3 +1126,152 @@ void Menu::insertTutorials(){
 
     }while(conteo == 10);
 }
+
+/******************************** TABLA HASH ************************************************/
+
+///BUSCAR TABLA HASH
+bool Menu::findFile(){
+    fstream myFile;
+    int sizeFile;
+    bool flag = false;
+
+    myFile.open("TablaHash.txt");
+
+    if(!myFile.good()){
+        flag = false;
+    }
+    else{
+        myFile.seekg(0, ios::end);
+        sizeFile = myFile.tellg();
+
+        if(sizeFile != 0){
+            flag = true;
+        }
+    }
+
+    myFile.close();
+    return flag;
+}
+
+///CREAR TABLA HASH
+void Menu::buildFile(){
+    fstream myFile;
+    contador = 0;       ///Se inicializa el contador en cero
+
+    myFile.open("TablaHash.txt",ios_base::app);     ///Crea archivo para tablas hash
+    myFile.seekp(0,ios::end);
+
+    for(int i = 0; i < 100; i++){
+        myFile.write((char*)&contador, sizeof(int));
+        for(int j = 0; j < 5; j++){
+            myFile.write((char*)&teacher, sizeof(teacher));
+        }
+    }
+
+    myFile.close();     ///Cierra archivo
+}
+
+///DIRECCION BASE
+int Menu::getDirBase(string& key){
+    int j = 0;
+    int tam = 0;
+    int base = 0;
+
+    tam = key.size();
+
+    while(j < tam) {
+        base = base + (100 * key[j]) + (key[j+1] % 84625);
+        j = j+2;
+        }
+
+    base = base%100;
+    return base;
+}
+
+///DIRECCION FISICA
+long int Menu::getDirFisica(int& base){
+    long int pos = 0;
+    pos = base * ((sizeof(teacher)*5) + sizeof(int));
+    return pos;
+}
+
+///ESCRIBIR A DISCO
+void Menu::writeToDisk(){
+    fstream myFile;
+    int dirBase = 0;
+    long int dirFisica = 0;
+    long int celda = 0;
+    PersonalData aux;
+    string key;
+
+    aux = teacher.getData();    ///Sacar datos personales de profesor
+    key = aux.getCurp();        ///Sacar clave (curp)
+
+    dirBase = getDirBase(key);          ///Obtener dirección base
+    dirFisica = getDirFisica(dirBase);  ///Obtener dirección fisica
+
+    myFile.open("TablaHash.txt");
+    myFile.seekg(dirFisica,ios::beg);
+    myFile.read((char*)&contador, sizeof(int));
+
+    if(contador < 4){
+        celda = dirFisica + (contador * sizeof(teacher)) + sizeof(int);
+        myFile.seekp(celda);
+        myFile.write((char*)&teacher, sizeof(teacher));
+        contador++;
+        celda = dirFisica;
+        myFile.seekp(celda);
+        myFile.write((char*)&contador, sizeof(int));
+    }
+    else{
+        cout << "\t\tRegistros llenos, ya no puedes agregar mas" << endl << "\t\t";
+        system("pause");
+    }
+
+    myFile.close();
+
+    myFile.open("CodigosProfesores.txt");   ///Abre archivo de codigos profesores
+    myFile.seekp(0,ios::end);
+
+    key = aux.getName().toString();
+
+    myFile << key << '|';
+
+    key = aux.getCurp();
+
+    myFile << key << '|';
+
+    myFile.close();     ///Cierra archivo
+}
+
+///MOSTRAR DATOS
+void Menu::showRegisters(){
+    fstream myFile;
+    int pos = 0;
+
+    myFile.open("TablasHash.txt");
+    myFile.seekg(0,ios::beg);
+
+    while(!myFile.eof()){
+        myFile.read((char*)&contador, sizeof(int));
+        if(contador == 0){
+            pos = pos + (5*sizeof(teacher) + sizeof(int));
+        }
+        else{
+            for(int i = 0; i < contador; i++){
+                myFile.read((char*)&teacher, sizeof(teacher));
+                cout << endl << endl;
+                cout << teacher.getData().toStringData() << endl;
+                cout << teacher.getData().toStringDependents() << endl;
+                cout << teacher.toStringFormation() << endl;
+                cout << teacher.toStringProduction() << endl;
+                cout << teacher.toStringCourses() << endl;
+                cout << teacher.toStringTutorial() << endl;
+            }
+            pos = pos + (5*sizeof(teacher) + sizeof(int));
+        }
+    }
+
+    myFile.close();
+}
+
