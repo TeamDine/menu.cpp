@@ -936,7 +936,7 @@ void Menu::insertTeachers(){
         flag = false;
         do{
             cout << endl << endl;
-            cout << "\t\tDesea agregar otra carrera" << endl;
+            cout << "\t\tDesea agregar otra materia" << endl;
             cout << "\t\t1)Si" << endl;
             cout << "\t\t2)No" << endl;
             cout << "\t\tOpcion: ";
@@ -967,3 +967,147 @@ void Menu::insertTeachers(){
 
     }while(conteo == 10);
 }
+
+/******************************** TUTORIAS ****************************************/
+void Menu::insertTutorials(){
+    Tutorials student;
+    Name myName;
+    Date myDate;
+    int myInt;
+    
+    int option = 0;
+    int pos = 0;
+    int conteo = 10;
+    
+    bool flag;
+    
+    do{
+	pos = teacher.getLastTutorial();
+	do{
+	    flag = false;
+	    system("cls");
+	    cout << endl << endl;
+	    cout << "\t\t\t*********Registro de datos (TUTORIAS)**************" << endl << endl << endl;
+      	    cout << "\t\tPor favor, llenar los siguientes campos disponibles" << endl << endl;
+	    cout << "\t\tSi desconoce un dato, solo agregue un guion '-' o teclee [enter] para continuar " << endl << endl;
+	
+	    cout << "\t\tIngrese nombre completo" << endl << endl;
+            cout << "\t\tApellido(s): ";
+            getline(cin, aux, '\n');
+
+            myName.setLast(aux);
+
+            cout << "\t\tNombre(s): ";
+            getline(cin, aux, '\n');
+
+            myName.setFirst(aux);
+
+            if(myName.isName(myName)){
+                flag = true;
+            }
+            else{
+                cout << "\t\tNombre invalido. Intente de nuevo" << endl << endl << "\t\t";
+                system("Pause");
+            }
+
+        } while(!flag);
+	
+	student.setName(myName);	///Se agrega nombre al estudiante
+	
+        cout << endl << "\t\tEs importante ingresar las siguientes fechas en el formato correspondiente <YYYY/MM/AA>";
+        cout << endl <<  "\t\tFecha de inicio (Ej. 2016/08/15) " << endl;
+        cout << "\t\tFecha: ";
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setYear(myInt);
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setMonth(myInt);
+        getline(cin, myStr, '\n');
+        myInt = atoi(myStr.c_str());
+        myDate.setDay(myInt);
+	
+	student.getInitialDate(myDate);		///Se agrega fecha de ingreso
+	
+        cout << endl << "\t\tEs importante ingresar las siguientes fechas en el formato correspondiente <YYYY/MM/AA>";
+        cout << endl <<  "\t\tFecha de finalizacion (Ej. 2016/08/15) " << endl;
+        cout << "\t\tFecha: ";
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setYear(myInt);
+        getline(cin, myStr, '/');
+        myInt = atoi(myStr.c_str());
+        myDate.setMonth(myInt);
+        getline(cin, myStr, '\n');
+        myInt = atoi(myStr.c_str());
+        myDate.setDay(myInt);
+	
+	student.getFinishDate(myDate);		///Se agrega fecha de finalizacion
+	
+
+        do{
+            flag = false;
+            system("cls");
+            cout << endl << endl;
+            cout << "\t\tRegistro de horas semanales" << endl;
+            cout << "\t\tHoras: ";
+            cin >> myInt;
+
+            if(!cin){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(),'\n');
+                cout << "\t\tCaracter incorrecto" << endl << "\t\t";
+                system("pause");
+            }
+            cin.ignore();
+
+            if(myInt < 0 or myInt > 15){
+                cout << "\t\tHoras invalidas, intentalo de nuevo" << endl << "\t\t";
+                system("cls");
+                }
+            else{
+                flag = true;
+                }
+
+            }while(!flag);
+
+            student.setHours(myInt);
+	
+	    teacher.insertTutorial(pos, student);	///Insertando en lista
+	    
+    /*** Perguntar si agregar mas de uno ***/
+        flag = false;
+        do{
+            cout << endl << endl;
+            cout << "\t\tDesea agregar otro Tutorado" << endl;
+            cout << "\t\t1)Si" << endl;
+            cout << "\t\t2)No" << endl;
+            cout << "\t\tOpcion: ";
+            cin >> option;
+
+            if(!cin){
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(),'\n');
+                cout << "\t\tCaracter incorrecto" << endl << "\t\t";
+                system("pause");
+            }
+            cin.ignore();
+
+            if(option == 1){
+                flag = true;
+                if(pos == conteo){
+                    cout << endl << endl;
+                    cout << "\t\tYa no puedes hacer mas registros " << endl << "\t\t";
+                    conteo = 0;
+                    system("pause");
+                }
+            }
+            else if(option == 2){
+                flag = true;
+                conteo = 0;
+            }
+        }while(!flag);
+	
+    }while(conteo == 10);
+}
+
