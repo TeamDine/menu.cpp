@@ -974,13 +974,14 @@ void Menu::insertTutorials(){
     Name myName;
     Date myDate;
     int myInt;
-    
+    string myStr;
+
     int option = 0;
     int pos = 0;
     int conteo = 10;
-    
+
     bool flag;
-    
+
     do{
 	pos = teacher.getLastTutorial();
 	do{
@@ -990,17 +991,17 @@ void Menu::insertTutorials(){
 	    cout << "\t\t\t*********Registro de datos (TUTORIAS)**************" << endl << endl << endl;
       	    cout << "\t\tPor favor, llenar los siguientes campos disponibles" << endl << endl;
 	    cout << "\t\tSi desconoce un dato, solo agregue un guion '-' o teclee [enter] para continuar " << endl << endl;
-	
+
 	    cout << "\t\tIngrese nombre completo" << endl << endl;
             cout << "\t\tApellido(s): ";
-            getline(cin, aux, '\n');
+            getline(cin, myStr, '\n');
 
-            myName.setLast(aux);
+            myName.setLast(myStr);
 
             cout << "\t\tNombre(s): ";
-            getline(cin, aux, '\n');
+            getline(cin, myStr, '\n');
 
-            myName.setFirst(aux);
+            myName.setFirst(myStr);
 
             if(myName.isName(myName)){
                 flag = true;
@@ -1011,9 +1012,9 @@ void Menu::insertTutorials(){
             }
 
         } while(!flag);
-	
+
 	student.setName(myName);	///Se agrega nombre al estudiante
-	
+
         cout << endl << "\t\tEs importante ingresar las siguientes fechas en el formato correspondiente <YYYY/MM/AA>";
         cout << endl <<  "\t\tFecha de inicio (Ej. 2016/08/15) " << endl;
         cout << "\t\tFecha: ";
@@ -1026,9 +1027,9 @@ void Menu::insertTutorials(){
         getline(cin, myStr, '\n');
         myInt = atoi(myStr.c_str());
         myDate.setDay(myInt);
-	
-	student.getInitialDate(myDate);		///Se agrega fecha de ingreso
-	
+
+	    student.setInitialDate(myDate);		///Se agrega fecha de ingreso
+
         cout << endl << "\t\tEs importante ingresar las siguientes fechas en el formato correspondiente <YYYY/MM/AA>";
         cout << endl <<  "\t\tFecha de finalizacion (Ej. 2016/08/15) " << endl;
         cout << "\t\tFecha: ";
@@ -1041,9 +1042,8 @@ void Menu::insertTutorials(){
         getline(cin, myStr, '\n');
         myInt = atoi(myStr.c_str());
         myDate.setDay(myInt);
-	
-	student.getFinishDate(myDate);		///Se agrega fecha de finalizacion
-	
+
+        student.setFinishDate(myDate);		///Se agrega fecha de finalizacion
 
         do{
             flag = false;
@@ -1063,7 +1063,7 @@ void Menu::insertTutorials(){
 
             if(myInt < 0 or myInt > 15){
                 cout << "\t\tHoras invalidas, intentalo de nuevo" << endl << "\t\t";
-                system("cls");
+                system("pause");
                 }
             else{
                 flag = true;
@@ -1072,9 +1072,9 @@ void Menu::insertTutorials(){
             }while(!flag);
 
             student.setHours(myInt);
-	
+
 	    teacher.insertTutorial(pos, student);	///Insertando en lista
-	    
+
     /*** Perguntar si agregar mas de uno ***/
         flag = false;
         do{
@@ -1107,6 +1107,6 @@ void Menu::insertTutorials(){
                 conteo = 0;
             }
         }while(!flag);
-	
+
     }while(conteo == 10);
 }
